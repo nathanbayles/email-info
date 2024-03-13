@@ -1,0 +1,181 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jshashes/1.0.8/hashes.min.js"></script>
+</head>
+
+<body class="ms-font-m ms-welcome" style="background-color: white;">
+    <div id="message"></div>
+    <hr />
+    <div id="hash">
+        <div id="hash-display"></div>
+        <button id="btn-toggle-seed">Show Seed</button>
+        <div id="seed-display" style="display: none;"></div>
+    </div>
+    <hr />
+    <div id="headers">
+        <button id="btn-toggle-headers">Show Headers</button>
+        <div id="headers-display" style="display: none;"></div>
+    </div>
+    <hr />
+    <button id="btn-log-to-console">Log to Console</button>
+</body>
+
+<script>
+
+    Office.onReady(function () {
+        let item = Office.context?.mailbox?.item ?? {
+            itemId: "123",
+            subject: "What's Up",
+            internetMessageId: "abc",
+            from: {
+                displayName: "Nathan Bayles",
+                emailAddress: "nbayles@hotmail.com"
+            }
+        };
+
+        console.log(item);
+
+        printPrimitive('itemId', item.itemId, 0);
+        printPrimitive('itemClass', item.itemClass, 0);
+        printPrimitive('itemType', item.itemType, 0);
+        printCollection('to', item.to, 0);
+        printCollection('cc', item.cc, 0);
+        printCollection('bcc', item.bcc, 0);
+        printObject('sender', item.sender, 0);
+        printObject('from', item.from, 0);
+        printPrimitive('conversationId', item.conversationId, 0);
+        printPrimitive('dateTimeCreated', item.dateTimeCreated, 0);
+        printPrimitive('subject', item.subject, 0);
+        printPrimitive('normalizedSubject', item.normalizedSubject, 0);
+        getBody(item, body => {
+            printPrimitive('body', body, 0, true);
+        });
+        printCollection('attachments', item.attachments, 0);
+
+        printFilevineHash(item);
+        printHeaders(item);
+
+        document.getElementById('btn-toggle-headers').addEventListener("click", element => {
+            toggleHeaders(item, element);
+        });
+
+        document.getElementById('btn-toggle-seed').addEventListener("click", element => {
+            toggleSeed(item, element);
+        });
+
+        document.getElementById('btn-log-to-console').addEventListener("click", () => {
+            console.log(item);
+        });
+    });
+
+    function printPrimitive(name, value, level, canWrap = false, target = 'message') {
+        let padding = 10 * level;
+
+        if (canWrap !== true) {
+
+            let nv = document.createElement('div');
+            nv.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px; white-space: nowrap;`);
+            nv.innerHTML = `<b>${name}</b> ${value}`;
+            document.getElementById(target).appendChild(nv);
+
+        } else {
+
+            let n = document.createElement('div');
+            n.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px;`);
+            n.innerHTML = `<b>${name}</b>`;
+            document.getElementById(target).appendChild(n);
+
+            padding = 10 * (level + 1);
+
+            let v = document.createElement('div');
+            v.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px;`);
+            v.innerHTML = `${value}`;
+            document.getElementById(target).appendChild(v);
+        }
+    }
+
+    function printCollection(name, collection, level) {
+        printPrimitive(name, '[]', level);
+        for (const [key, value] of Object.entries(collection)) {
+            printObject(key, value, level + 1);
+        }
+    }
+
+    function printObject(name, obj, level) {
+        printPrimitive(name, '', level);
+        for (const [key, value] of Object.entries(obj)) {
+            printPrimitive(key, value, level + 1, false);
+        }
+    }
+
+    function getBody(item, onResult) {
+        item.body.getAsync(
+            'text',
+            (bodyResult) => {
+                if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
+                    onResult(bodyResult.value);
+                }
+                else {
+                    onResult("Error retrieving body: " + bodyResult.error.message);
+                }
+            });
+    }
+
+    function printFilevineHash(item) {
+        var SHA256 = new Hashes.SHA256;
+        getBody(item, body => {
+            // created date might be difficult to get the same between client and server
+            // because of date formatting differences
+            let dateStr = item.dateTimeCreated.toISOString();
+
+            var str = `${dateStr.substring(0, dateStr.lastIndexOf('.'))} ${item.subject} ${body} `;
+            for (const [key, value] of Object.entries(item.attachments)) {
+                str += `${value.name} ${value.size} `;
+            }
+            printPrimitive('filevineHash', SHA256.hex(str), 0, false, 'hash-display');
+            printPrimitive('hashSeed', str, 0, true, 'seed-display');
+        });
+    }
+
+    function printHeaders(item) {
+        item.getAllInternetHeadersAsync(
+            (headerResult) => {
+                if (headerResult.status === Office.AsyncResultStatus.Succeeded) {
+                    printPrimitive('headers', headerResult.value, 0, true, 'headers-display');
+                } else {
+                    console.log("Error getting selected headers: " + JSON.stringify(headerResult.error));
+                }
+            }
+        );
+    }
+
+    function toggleHeaders(item, event) {
+        var headers = document.getElementById('headers-display');
+        let isVisible = headers.offsetParent !== null;
+        if (isVisible) {
+            headers.style.display = 'none';
+            event.target.textContent = 'Show Headers'
+        }
+        else {
+            headers.style.display = 'block';
+            event.target.textContent = 'Hide Headers'
+        }
+    }
+
+    function toggleSeed(item, event) {
+        var seed = document.getElementById('seed-display');
+        let isVisible = seed.offsetParent !== null;
+        if (isVisible) {
+            seed.style.display = 'none';
+            event.target.textContent = 'Show Seed'
+        }
+        else {
+            seed.style.display = 'block';
+            event.target.textContent = 'Hide Seed'
+        }
+    }
+</script>
+
+</html>
