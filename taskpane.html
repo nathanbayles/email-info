@@ -133,16 +133,16 @@
     function printFilevineHash(item) {
         var SHA256 = new Hashes.SHA256("filevine");
 
-        item.internetHeaders.getAsync(
-            ["message-id"],
-            (headerResult) => {
-                if (headerResult.status === Office.AsyncResultStatus.Succeeded) {
-                    console.log("Selected headers: " + JSON.stringify(headerResult.value));
-                } else {
-                    console.log("Error getting selected headers: " + JSON.stringify(asyncResult.error));
-                }
-            }
-        );
+        // item.getAllInternetHeadersAsync(
+        //     ["message-id"],
+        //     (headerResult) => {
+        //         if (headerResult.status === Office.AsyncResultStatus.Succeeded) {
+        //             console.log("Selected headers: " + JSON.stringify(headerResult.value));
+        //         } else {
+        //             console.log("Error getting selected headers: " + JSON.stringify(asyncResult.error));
+        //         }
+        //     }
+        // );
 
         getBody(item, body => {
             // created date might be difficult to get the same between client and server
