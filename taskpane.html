@@ -55,7 +55,10 @@
         printCollection('attachments', item.attachments, 0);
 
         printFilevineHash(item);
-        printHeaders(item);
+        
+        getHeaders(item, headers => {
+            printPrimitive('headers', headers, 0, true, 'headers-display', '');
+        });
 
         document.getElementById('btn-toggle-headers').addEventListener("click", element => {
             toggleHeaders(item, element);
@@ -116,6 +119,18 @@
         }
     }
 
+    function getHeaders(item, onResult) {
+        item.getAllInternetHeadersAsync(
+            (headerResult) => {
+                if (headerResult.status === Office.AsyncResultStatus.Succeeded) {
+                    onResult(headerResult.value);
+                } else {
+                    onResult("Error getting selected headers: " + JSON.stringify(headerResult.error));
+                }
+            }
+        );
+    }
+
     function getBody(item, onResult) {
         item.body.getAsync(
             'html',
@@ -129,6 +144,8 @@
                 }
             });
     }
+
+    //header.match(/^Authentication-Results:[0-9a-zA-Z =\(\)\.\n;-]*$/gm)[0]
 
     function printFilevineHash(item) {
         var SHA256 = new Hashes.SHA256("filevine");
@@ -162,8 +179,6 @@
             printPrimitive('hashSeed', rawStr, 0, true, 'seed-display', '');
         });
     }
-
-
 
     function printHeaders(item) {
         item.getAllInternetHeadersAsync(
