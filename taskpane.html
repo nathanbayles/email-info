@@ -131,7 +131,7 @@
             let dateStr = item.dateTimeCreated.toISOString();
             let shortDateStr = dateStr.substring(0, dateStr.lastIndexOf('.'));
 
-            var rawStr = `${item.body}`;
+            var rawStr = item.body;
             // var rawStr = `${item.subject} ${body} `;
             // for (const [key, value] of Object.entries(item.attachments)) {
             //     rawStr += `${value.name} ${value.size} `;
