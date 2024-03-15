@@ -115,8 +115,8 @@
             'text',
             (bodyResult) => {
                 if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
-                    console.log(typeof bodyResult.value);
-                    onResult(bodyResult.value);
+                    console.log(`${bodyResult.value}`);
+                    onResult(`${bodyResult.value}`);
                 }
                 else {
                     onResult("Error retrieving body: " + bodyResult.error.message);
