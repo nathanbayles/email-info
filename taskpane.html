@@ -123,9 +123,6 @@
                 if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
                     var doc = new DOMParser().parseFromString(bodyResult.value.trim(), 'text/html');
                     onResult(encodeURI((doc.body.textContent || "").trim()));
-                    //return doc.body.textContent || "";
-
-                    //onResult(bodyResult.value.trim());
                 }
                 else {
                     onResult("Error retrieving body: " + bodyResult.error.message);
@@ -138,14 +135,14 @@
         getBody(item, body => {
             // created date might be difficult to get the same between client and server
             // because of date formatting differences
-            let dateStr = item.dateTimeCreated.toISOString();
-            let shortDateStr = dateStr.substring(0, dateStr.lastIndexOf('.'));
+            // let dateStr = item.dateTimeCreated.toISOString();
+            // let shortDateStr = dateStr.substring(0, dateStr.lastIndexOf('.'));
+            let shortDateStr = item.dateTimeCreated.getTime() / 1000;
 
-            var rawStr = body;
-            //var rawStr = `${item.subject} ${body}`;
-            // for (const [key, value] of Object.entries(item.attachments)) {
-            //     rawStr += ` ${value.name} ${value.size}`;
-            // }
+            var rawStr = `${item.subject} ${body}`;
+            for (const [key, value] of Object.entries(item.attachments)) {
+                rawStr += ` ${value.name} ${value.size}`;
+            }
 
             let hashStr = SHA256.setUTF8(true).hex(rawStr);
 
