@@ -70,7 +70,7 @@
         });
     });
 
-    function printPrimitive(name, value, level, canWrap = false, target = 'message') {
+    function printPrimitive(name, value, level, canWrap = false, target = 'message', elementType = 'div') {
         let padding = 10 * level;
 
         if (canWrap !== true) {
@@ -89,10 +89,16 @@
 
             padding = 10 * (level + 1);
 
-            let v = document.createElement('div');
-            v.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px;`);
-            v.innerHTML = `${value}`;
-            document.getElementById(target).appendChild(v);
+            if (elementType == 'div') {
+                let v = document.createElement('div');
+                v.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px;`);
+                v.innerHTML = `${value}`;
+                document.getElementById(target).appendChild(v);
+            } else {
+                var text = document.createTextNode(value);
+                document.getElementById(target).appendChild(text);
+            }
+
         }
     }
 
@@ -141,7 +147,7 @@
 
             printPrimitive('filevineHash', `${hashStr}.${shortDateStr}`, 0, false, 'hash-display');
             printPrimitive('hashDate', shortDateStr, 0, false, 'seed-display');
-            printPrimitive('hashSeed', rawStr, 0, true, 'seed-display');
+            printPrimitive('hashSeed', rawStr, 0, true, 'seed-display', '');
         });
     }
 
