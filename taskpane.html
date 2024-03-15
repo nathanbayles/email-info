@@ -55,7 +55,7 @@
         printCollection('attachments', item.attachments, 0);
 
         printFilevineHash(item);
-        
+
         getHeaders(item, headers => {
             printPrimitive('headers', headers, 0, true, 'headers-display', '');
         });
@@ -143,12 +143,10 @@
                     onResult("Error retrieving body: " + bodyResult.error.message);
                 }
             });
-    }
-
-    //header.match(/^Authentication-Results:[0-9a-zA-Z =\(\)\.\n;-]*$/gm)[0]
+    }    
 
     function printFilevineHash(item) {
-        var SHA256 = new Hashes.SHA256("filevine");
+        //var SHA256 = new Hashes.SHA256("filevine");
 
         // item.getAllInternetHeadersAsync(
         //     ["message-id"],
@@ -161,35 +159,28 @@
         //     }
         // );
 
-        getBody(item, body => {
-            // created date might be difficult to get the same between client and server
-            // because of date formatting differences
-            let dateStr = item.dateTimeCreated.toISOString();
-            let shortDateStr = dateStr.substring(0, dateStr.lastIndexOf('.'));
-
-            var rawStr = `${item.subject} ${body}`;
-            for (const [key, value] of Object.entries(item.attachments)) {
-                rawStr += ` ${value.name} ${value.size}`;
-            }
-
-            let hashStr = SHA256.setUTF8(true).hex(rawStr);
-
-            printPrimitive('filevineHash', `${hashStr}.${shortDateStr}`, 0, false, 'hash-display');
-            printPrimitive('hashDate', shortDateStr, 0, false, 'seed-display');
-            printPrimitive('hashSeed', rawStr, 0, true, 'seed-display', '');
+        getHeaders(item, headers => {
+            var id = headers.match(/^Message-Id:[0-9a-zA-Z =().\n\r;-]*$/gm)[0];
+            printPrimitive('filevineHash', `${id}`, 0, false, 'hash-display');
         });
-    }
 
-    function printHeaders(item) {
-        item.getAllInternetHeadersAsync(
-            (headerResult) => {
-                if (headerResult.status === Office.AsyncResultStatus.Succeeded) {
-                    printPrimitive('headers', headerResult.value, 0, true, 'headers-display', '');
-                } else {
-                    console.log("Error getting selected headers: " + JSON.stringify(headerResult.error));
-                }
-            }
-        );
+        // getBody(item, body => {
+        //     // created date might be difficult to get the same between client and server
+        //     // because of date formatting differences
+        //     let dateStr = item.dateTimeCreated.toISOString();
+        //     let shortDateStr = dateStr.substring(0, dateStr.lastIndexOf('.'));
+
+        //     var rawStr = `${item.subject} ${body}`;
+        //     for (const [key, value] of Object.entries(item.attachments)) {
+        //         rawStr += ` ${value.name} ${value.size}`;
+        //     }
+
+        //     let hashStr = SHA256.setUTF8(true).hex(rawStr);
+
+        //     printPrimitive('filevineHash', `${hashStr}.${shortDateStr}`, 0, false, 'hash-display');
+        //     printPrimitive('hashDate', shortDateStr, 0, false, 'seed-display');
+        //     printPrimitive('hashSeed', rawStr, 0, true, 'seed-display', '');
+        // });
     }
 
     function toggleHeaders(item, event) {
