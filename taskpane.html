@@ -124,7 +124,7 @@
     }
 
     function printFilevineHash(item) {
-        var SHA256 = new Hashes.SHA256;
+        var SHA256 = new Hashes.SHA256("filevine");
         getBody(item, body => {
             // created date might be difficult to get the same between client and server
             // because of date formatting differences
