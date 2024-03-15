@@ -140,7 +140,7 @@
             let hashStr = SHA256.setUTF8(true).hex(normalString);
 
             printPrimitive('filevineHash', `${hashStr}.${shortDateStr}`, 0, false, 'hash-display');
-            printPrimitive('hashDate', shortDateStr, 0, normal, 'seed-display');
+            printPrimitive('hashDate', shortDateStr, 0, false, 'seed-display');
             printPrimitive('hashSeed', rawStr, 0, true, 'seed-display');
             printPrimitive('normalizedSeed', normalString, 0, true, 'seed-display');
         });
