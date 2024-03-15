@@ -115,8 +115,7 @@
             'text',
             (bodyResult) => {
                 if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
-                    console.log(`${bodyResult.value}`);
-                    onResult(`${bodyResult.value}`);
+                    onResult(bodyResult.value);
                 }
                 else {
                     onResult("Error retrieving body: " + bodyResult.error.message);
@@ -132,14 +131,14 @@
             let dateStr = item.dateTimeCreated.toISOString();
             let shortDateStr = dateStr.substring(0, dateStr.lastIndexOf('.'));
 
-            var rawStr = item.body;
-            // var rawStr = `${item.subject} ${body} `;
+            var rawStr = body;
+            //var rawStr = `${item.subject} ${body} `;
             // for (const [key, value] of Object.entries(item.attachments)) {
             //     rawStr += `${value.name} ${value.size} `;
             // }
 
-            // var normalString = rawStr.normalize('NFC');
-            let hashStr = SHA256.setUTF8(true).hex(rawStr);
+             var normalString = rawStr.normalize('NFC');
+            let hashStr = SHA256.setUTF8(true).hex(normalString);
 
             printPrimitive('filevineHash', `${hashStr}.${shortDateStr}`, 0, false, 'hash-display');
             printPrimitive('hashDate', shortDateStr, 0, false, 'seed-display');
