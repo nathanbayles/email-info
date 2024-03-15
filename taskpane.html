@@ -130,12 +130,13 @@
             // because of date formatting differences
             let dateStr = item.dateTimeCreated.toISOString();
 
-            var str = `${dateStr.substring(0, dateStr.lastIndexOf('.'))} ${item.subject} ${body} `;
+            var str = `${item.subject} ${body} `;
             for (const [key, value] of Object.entries(item.attachments)) {
                 str += `${value.name} ${value.size} `;
             }
-            printPrimitive('filevineHash', SHA256.hex(str), 0, false, 'hash-display');
+            printPrimitive('filevineHash', $`${SHA256.hex(str)}.${dateStr.substring(0, dateStr.lastIndexOf('.'))}`, 0, false, 'hash-display');
             printPrimitive('hashSeed', str, 0, true, 'seed-display');
+            printPrimitive('hashDate', str, 0, true, 'seed-display');
         });
     }
 
