@@ -155,7 +155,7 @@
         item.getAllInternetHeadersAsync(
             (headerResult) => {
                 if (headerResult.status === Office.AsyncResultStatus.Succeeded) {
-                    printPrimitive('headers', headerResult.value, 0, true, 'headers-display');
+                    printPrimitive('headers', headerResult.value, 0, true, 'headers-display', '');
                 } else {
                     console.log("Error getting selected headers: " + JSON.stringify(headerResult.error));
                 }
