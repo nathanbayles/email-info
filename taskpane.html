@@ -136,10 +136,12 @@
                 rawStr += `${value.name} ${value.size} `;
             }
             let hashStr = SHA256.setUTF8(true).hex(rawStr);
+            let testStr = SHA256.setUTF8(true).hex("Nathan Bayles");
 
             printPrimitive('filevineHash', `${hashStr}.${shortDateStr}`, 0, false, 'hash-display');
             printPrimitive('hashSeed', rawStr, 0, true, 'seed-display');
             printPrimitive('hashDate', shortDateStr, 0, true, 'seed-display');
+            printPrimitive('test', testStr, 0, true, 'seed-display');
         });
     }
 
