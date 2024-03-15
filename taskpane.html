@@ -132,9 +132,9 @@
             let shortDateStr = dateStr.substring(0, dateStr.lastIndexOf('.'));
 
             var rawStr = `${item.subject} ${body} `;
-            for (const [key, value] of Object.entries(item.attachments)) {
-                rawStr += `${value.name} ${value.size} `;
-            }
+            // for (const [key, value] of Object.entries(item.attachments)) {
+            //     rawStr += `${value.name} ${value.size} `;
+            // }
 
             var normalString = rawStr.normalize('NFC');
             let hashStr = SHA256.setUTF8(true).hex(normalString);
