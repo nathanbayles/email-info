@@ -161,7 +161,8 @@
 
         getHeaders(item, headers => {
             //var id = headers.match(/^Message-Id:[0-9a-zA-Z =().\n\r;-]*$/gm)[0];
-            var id = headers.match(/^Message-Id:[0-9a-zA-Z =\(\)\.\n;-\\r]*$/gm);
+            
+            var id = headers.match(/Message-Id:.*/gim);
             console.log(id);
             printPrimitive('filevineHash', `${id}`, 0, false, 'hash-display');
         });
