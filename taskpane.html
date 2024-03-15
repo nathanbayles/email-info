@@ -3,6 +3,7 @@
 <head>
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jshashes/1.0.8/hashes.min.js"></script>
+    <script type="module" src="/node_modules/postal-mime/src/postal-mime.js"></script>
 </head>
 
 <body class="ms-font-m ms-welcome" style="background-color: white;">
@@ -22,9 +23,10 @@
     <button id="btn-log-to-console">Log to Console</button>
 </body>
 
-<script>
+<script type="module" async>
+    import PostalMime from './node_modules/postal-mime/src/postal-mime.js';
 
-    Office.onReady(function () {
+    Office.onReady(async function () {
         let item = Office.context?.mailbox?.item ?? {
             itemId: "123",
             subject: "What's Up",
@@ -34,6 +36,14 @@
                 emailAddress: "nbayles@hotmail.com"
             }
         };
+
+        const parser = new PostalMime();
+        const email = await parser.parse(`Subject: My awesome email 🤓
+        Content-Type: text/html; charset=utf-8
+
+        <p>Hello world 😵‍💫</p>`);
+
+        console.log(email);
 
         console.log(item);
 
@@ -57,6 +67,17 @@
         printFilevineHash(item);
 
         getHeaders(item, headers => {
+            //printPrimitive('headers', headers, 0, true, 'headers-display', '');
+            //var id = headers.match(/^Message-Id:[0-9a-zA-Z =().\n\r;-]*$/gm)[0];
+
+            const parser = new PostalMime();
+            parser.parse(headers).then(email => {
+                console.log(email);
+                email.headers.forEach(header => {
+                    printPrimitive(`${header.key}`, `${header.value}`, 0, false, 'headers-display', '');
+                });
+            });
+
             printPrimitive('headers', headers, 0, true, 'headers-display', '');
         });
 
@@ -68,7 +89,7 @@
             toggleSeed(item, element);
         });
 
-        document.getElementById('btn-log-to-console').addEventListener("click", () => {
+        document.getElementById('btn-log-to-console').addEventListener("click", _ => {
             console.log(item);
         });
     });
@@ -76,33 +97,40 @@
     function printPrimitive(name, value, level, canWrap = false, target = 'message', elementType = 'div') {
         let padding = 10 * level;
 
-        if (canWrap !== true) {
-
-            let nv = document.createElement('div');
-            nv.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px; white-space: nowrap;`);
-            nv.innerHTML = `<b>${name}</b> ${value}`;
-            document.getElementById(target).appendChild(nv);
-
-        } else {
+        //if (canWrap !== true) {
 
             let n = document.createElement('div');
-            n.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px;`);
+            n.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px; white-space: nowrap;`);
             n.innerHTML = `<b>${name}</b>`;
+
+            let s = canWrap ? 'white-space: pre-wrap;' : 'display:inline-block;';
+            let v = document.createElement('pre');
+            v.setAttribute('style', `${s}margin-left:10px;`);
+            v.innerText = `${value}`;
+            n.appendChild(v);
+
             document.getElementById(target).appendChild(n);
 
-            padding = 10 * (level + 1);
+        // } else {
 
-            if (elementType == 'div') {
-                let v = document.createElement('div');
-                v.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px;`);
-                v.innerHTML = `${value}`;
-                document.getElementById(target).appendChild(v);
-            } else {
-                var text = document.createTextNode(value);
-                document.getElementById(target).appendChild(text);
-            }
+        //     let n = document.createElement('div');
+        //     n.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px;`);
+        //     n.innerHTML = `<b>${name}</b>`;
+        //     document.getElementById(target).appendChild(n);
 
-        }
+        //     padding = 10 * (level + 1);
+
+        //     if (elementType == 'div') {
+        //         let v = document.createElement('div');
+        //         v.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px;`);
+        //         v.innerHTML = `${value}`;
+        //         document.getElementById(target).appendChild(v);
+        //     } else {
+        //         var text = document.createTextNode(value);
+        //         document.getElementById(target).appendChild(text);
+        //     }
+
+        // }
     }
 
     function printCollection(name, collection, level) {
@@ -136,8 +164,9 @@
             'html',
             (bodyResult) => {
                 if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
-                    var doc = new DOMParser().parseFromString(bodyResult.value.trim(), 'text/html');
-                    onResult(encodeURI((doc.body.textContent || "").trim()));
+                    onResult(bodyResult.value);
+                    // var doc = new DOMParser().parseFromString(bodyResult.value.trim(), 'text/html');
+                    // onResult(encodeURI((doc.body.textContent || "").trim()));
                 }
                 else {
                     onResult("Error retrieving body: " + bodyResult.error.message);
@@ -145,7 +174,7 @@
             });
     }    
 
-    function printFilevineHash(item) {
+    async function printFilevineHash(item) {
         //var SHA256 = new Hashes.SHA256("filevine");
 
         // item.getAllInternetHeadersAsync(
@@ -159,13 +188,22 @@
         //     }
         // );
 
-        getHeaders(item, headers => {
-            //var id = headers.match(/^Message-Id:[0-9a-zA-Z =().\n\r;-]*$/gm)[0];
+        // getHeaders(item, headers => {
+        //     //var id = headers.match(/^Message-Id:[0-9a-zA-Z =().\n\r;-]*$/gm)[0];
+
+        //     const parser = new PostalMime();
+        //     parser.parse(headers).then(email => {
+        //         email.headers.forEach(header => {
+        //             printPrimitive('filevineHash', `${id}`, 0, false, 'hash-display');
+        //         });
+        //     });
             
-            var id = headers.match(/Message-Id:.*/gim);
-            console.log(id);
-            printPrimitive('filevineHash', `${id}`, 0, false, 'hash-display');
-        });
+        //     var id = headers.match(/Message-Id:.*/gim);
+        //     console.log(id);
+        //     printPrimitive('filevineHash', `${id}`, 0, false, 'hash-display');
+
+        //     printPrimitive('headers', headers, 0, true, 'headers-display', '');
+        // });
 
         // getBody(item, body => {
         //     // created date might be difficult to get the same between client and server
