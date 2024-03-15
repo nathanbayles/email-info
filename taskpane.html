@@ -129,14 +129,15 @@
             // created date might be difficult to get the same between client and server
             // because of date formatting differences
             let dateStr = item.dateTimeCreated.toISOString();
+            let shortDateStr = dateStr.substring(0, dateStr.lastIndexOf('.'));
 
-            var str = `${item.subject} ${body} `;
+            var hashStr = `${item.subject} ${body} `;
             for (const [key, value] of Object.entries(item.attachments)) {
-                str += `${value.name} ${value.size} `;
+                hashStr += `${value.name} ${value.size} `;
             }
-            printPrimitive('filevineHash', `${SHA256.hex(str)}.${dateStr.substring(0, dateStr.lastIndexOf('.'))}`, 0, false, 'hash-display');
-            printPrimitive('hashSeed', str, 0, true, 'seed-display');
-            printPrimitive('hashDate', str, 0, true, 'seed-display');
+            printPrimitive('filevineHash', `${SHA256.hex(hashStr)}.${shortDateStr}`, 0, false, 'hash-display');
+            printPrimitive('hashSeed', hashStr, 0, true, 'seed-display');
+            printPrimitive('hashDate', shortDateStr, 0, true, 'seed-display');
         });
     }
 
