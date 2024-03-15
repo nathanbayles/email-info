@@ -122,7 +122,7 @@
             (bodyResult) => {
                 if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
                     var doc = new DOMParser().parseFromString(bodyResult.value.trim(), 'text/html');
-                    onResult(encodeURI((doc.body.textContent || "").trim));
+                    onResult(encodeURI((doc.body.textContent || "").trim()));
                     //return doc.body.textContent || "";
 
                     //onResult(bodyResult.value.trim());
