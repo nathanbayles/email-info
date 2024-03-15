@@ -112,7 +112,7 @@
 
     function getBody(item, onResult) {
         item.body.getAsync(
-            'text',
+            'html',
             (bodyResult) => {
                 if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
                     onResult(encodeURI(bodyResult.value.trim()));
