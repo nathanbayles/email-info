@@ -115,7 +115,7 @@
             'text',
             (bodyResult) => {
                 if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
-                    onResult(bodyResult.value.normalize('NFKD'));
+                    onResult(encodeURI(bodyResult.value));
                 }
                 else {
                     onResult("Error retrieving body: " + bodyResult.error.message);
