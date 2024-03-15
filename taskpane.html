@@ -133,7 +133,7 @@
     function printFilevineHash(item) {
         var SHA256 = new Hashes.SHA256("filevine");
 
-        Office.context.mailbox.item.internetHeaders.getAsync(
+        item.internetHeaders.getAsync(
             ["message-id"],
             (headerResult) => {
                 if (headerResult.status === Office.AsyncResultStatus.Succeeded) {
