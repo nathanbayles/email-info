@@ -115,7 +115,7 @@
             'text',
             (bodyResult) => {
                 if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
-                    onResult(encodeURI(bodyResult.value));
+                    onResult(encodeURI(bodyResult.value.trim()));
                 }
                 else {
                     onResult("Error retrieving body: " + bodyResult.error.message);
