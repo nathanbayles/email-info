@@ -121,7 +121,11 @@
             'html',
             (bodyResult) => {
                 if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
-                    onResult(bodyResult.value.trim());
+                    var doc = new DOMParser().parseFromString(bodyResult.value.trim(), 'text/html');
+                    onResult(doc.body.textContent || "");
+                    //return doc.body.textContent || "";
+
+                    //onResult(bodyResult.value.trim());
                 }
                 else {
                     onResult("Error retrieving body: " + bodyResult.error.message);
