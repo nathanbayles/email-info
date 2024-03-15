@@ -131,12 +131,14 @@
             let dateStr = item.dateTimeCreated.toISOString();
             let shortDateStr = dateStr.substring(0, dateStr.lastIndexOf('.'));
 
-            var hashStr = `${item.subject} ${body} `;
+            var rawStr = `${item.subject} ${body} `;
             for (const [key, value] of Object.entries(item.attachments)) {
-                hashStr += `${value.name} ${value.size} `;
+                rawStr += `${value.name} ${value.size} `;
             }
-            printPrimitive('filevineHash', `${SHA256.hex(hashStr)}.${shortDateStr}`, 0, false, 'hash-display');
-            printPrimitive('hashSeed', hashStr, 0, true, 'seed-display');
+            let hashStr = SHA256.setUTF8(true).hex(rawStr);
+
+            printPrimitive('filevineHash', `${hashStr}.${shortDateStr}`, 0, false, 'hash-display');
+            printPrimitive('hashSeed', rawStr, 0, true, 'seed-display');
             printPrimitive('hashDate', shortDateStr, 0, true, 'seed-display');
         });
     }
