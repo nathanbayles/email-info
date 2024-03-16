@@ -4,5 +4,5 @@
 
 postal-mime@^2.1.2:
   version "2.1.2"
-  resolved "https://registry.npmjs.org/postal-mime/-/postal-mime-2.1.2.tgz"
+  resolved "https://registry.yarnpkg.com/postal-mime/-/postal-mime-2.1.2.tgz#e6c36ffa7db2e0e4a133cf1b8942c4850f74f22a"
   integrity sha512-qe8rzPOIejGMmVOKF3LTKddNAly2QQXYvgnN3o7RA0J/U0EE16s3dbvuMWF7F8+MrKSBBZnWkciYwIRzV7Arlg==
