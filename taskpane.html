@@ -9,16 +9,18 @@
 <body class="ms-font-m ms-welcome" style="background-color: white;">
     <div id="message"></div>
     <hr />
-    <div id="hash">
-        <div id="hash-display"></div>
-        <button id="btn-toggle-seed">Show Seed</button>
-        <div id="seed-display" style="display: none;"></div>
-    </div>
+    <div id="hash-display"></div>
+    <!-- <button id="btn-toggle-seed">Show Seed</button>
+        <div id="seed-display" style="display: none;"></div> -->
     <hr />
-    <div id="headers">
-        <button id="btn-toggle-headers">Show Headers</button>
-        <div id="headers-display" style="display: none;"></div>
-    </div>
+    <button id="btn-toggle-body">Show Body</button>
+    <div id="body-display" style="display: none;"></div>
+    <hr />
+    <button id="btn-toggle-headers">Show Headers</button>
+    <div id="headers-display" style="display: none;"></div>
+    <hr />
+    <button id="btn-toggle-raw-headers">Show Raw Headers</button>
+    <div id="raw-headers-display" style="display: none;"></div>
     <hr />
     <button id="btn-log-to-console">Log to Console</button>
 </body>
@@ -37,16 +39,6 @@
             }
         };
 
-        const parser = new PostalMime();
-        const email = await parser.parse(`Subject: My awesome email 🤓
-        Content-Type: text/html; charset=utf-8
-
-        <p>Hello world 😵‍💫</p>`);
-
-        console.log(email);
-
-        console.log(item);
-
         printPrimitive('itemId', item.itemId, 0);
         printPrimitive('itemClass', item.itemClass, 0);
         printPrimitive('itemType', item.itemType, 0);
@@ -59,34 +51,42 @@
         printPrimitive('dateTimeCreated', item.dateTimeCreated, 0);
         printPrimitive('subject', item.subject, 0);
         printPrimitive('normalizedSubject', item.normalizedSubject, 0);
-        getBody(item, body => {
-            printPrimitive('body', body, 0, true);
-        });
         printCollection('attachments', item.attachments, 0);
 
-        printFilevineHash(item);
+        getHash(item, hash => {
+            printPrimitive('hash', hash, 0, false, 'hash-display');
+            //printPrimitive('seed', hash, 0, true, 'seed-display');
+        });
+
+        getBody(item, body => {
+            printPrimitive('body', body, 0, true, 'body-display');
+        });
 
         getHeaders(item, headers => {
-            //printPrimitive('headers', headers, 0, true, 'headers-display', '');
-            //var id = headers.match(/^Message-Id:[0-9a-zA-Z =().\n\r;-]*$/gm)[0];
-
             const parser = new PostalMime();
             parser.parse(headers).then(email => {
-                console.log(email);
                 email.headers.forEach(header => {
-                    printPrimitive(`${header.key}`, `${header.value}`, 0, false, 'headers-display', '');
+                    printPrimitive(`${header.key}`, `${header.value}`, 0, false, 'headers-display');
                 });
             });
 
-            printPrimitive('headers', headers, 0, true, 'headers-display', '');
+            printPrimitive('raw headers', headers, 0, true, 'raw-headers-display');
         });
 
-        document.getElementById('btn-toggle-headers').addEventListener("click", element => {
-            toggleHeaders(item, element);
+        document.getElementById('btn-toggle-headers').addEventListener("click", event => {
+            toggleVisibility('headers-display', 'Headers', event);
         });
 
-        document.getElementById('btn-toggle-seed').addEventListener("click", element => {
-            toggleSeed(item, element);
+        document.getElementById('btn-toggle-raw-headers').addEventListener("click", event => {
+            toggleVisibility('raw-headers-display', 'Raw Headers', event);
+        });
+
+        // document.getElementById('btn-toggle-seed').addEventListener("click", event => {
+        //     toggleVisibility('seed-display', 'Seed', event);
+        // });
+
+        document.getElementById('btn-toggle-body').addEventListener("click", event => {
+            toggleVisibility('body-display', 'Body', event);
         });
 
         document.getElementById('btn-log-to-console').addEventListener("click", _ => {
@@ -97,40 +97,17 @@
     function printPrimitive(name, value, level, canWrap = false, target = 'message', elementType = 'div') {
         let padding = 10 * level;
 
-        //if (canWrap !== true) {
+        let n = document.createElement('div');
+        n.setAttribute('style', `padding:5px 0 5px ${padding}px; font-family:"Tahoma"; font-size:11px; white-space: nowrap;`);
+        n.innerHTML = `<b>${name}</b>`;
 
-            let n = document.createElement('div');
-            n.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px; white-space: nowrap;`);
-            n.innerHTML = `<b>${name}</b>`;
+        let s = canWrap ? 'white-space: pre-wrap;' : 'display:inline-block;';
+        let v = document.createElement('pre');
+        v.setAttribute('style', `${s} padding:0; margin:0 0 0 10;`);
+        v.innerText = `${value}`;
+        n.appendChild(v);
 
-            let s = canWrap ? 'white-space: pre-wrap;' : 'display:inline-block;';
-            let v = document.createElement('pre');
-            v.setAttribute('style', `${s}margin-left:10px;`);
-            v.innerText = `${value}`;
-            n.appendChild(v);
-
-            document.getElementById(target).appendChild(n);
-
-        // } else {
-
-        //     let n = document.createElement('div');
-        //     n.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px;`);
-        //     n.innerHTML = `<b>${name}</b>`;
-        //     document.getElementById(target).appendChild(n);
-
-        //     padding = 10 * (level + 1);
-
-        //     if (elementType == 'div') {
-        //         let v = document.createElement('div');
-        //         v.setAttribute('style', `padding-left:${padding}px; font-family:"Tahoma"; font-size:11px;`);
-        //         v.innerHTML = `${value}`;
-        //         document.getElementById(target).appendChild(v);
-        //     } else {
-        //         var text = document.createTextNode(value);
-        //         document.getElementById(target).appendChild(text);
-        //     }
-
-        // }
+        document.getElementById(target).appendChild(n);
     }
 
     function printCollection(name, collection, level) {
@@ -172,81 +149,33 @@
                     onResult("Error retrieving body: " + bodyResult.error.message);
                 }
             });
-    }    
-
-    async function printFilevineHash(item) {
-        //var SHA256 = new Hashes.SHA256("filevine");
-
-        // item.getAllInternetHeadersAsync(
-        //     ["message-id"],
-        //     (headerResult) => {
-        //         if (headerResult.status === Office.AsyncResultStatus.Succeeded) {
-        //             console.log("Selected headers: " + JSON.stringify(headerResult.value));
-        //         } else {
-        //             console.log("Error getting selected headers: " + JSON.stringify(asyncResult.error));
-        //         }
-        //     }
-        // );
-
-        // getHeaders(item, headers => {
-        //     //var id = headers.match(/^Message-Id:[0-9a-zA-Z =().\n\r;-]*$/gm)[0];
-
-        //     const parser = new PostalMime();
-        //     parser.parse(headers).then(email => {
-        //         email.headers.forEach(header => {
-        //             printPrimitive('filevineHash', `${id}`, 0, false, 'hash-display');
-        //         });
-        //     });
-            
-        //     var id = headers.match(/Message-Id:.*/gim);
-        //     console.log(id);
-        //     printPrimitive('filevineHash', `${id}`, 0, false, 'hash-display');
-
-        //     printPrimitive('headers', headers, 0, true, 'headers-display', '');
-        // });
-
-        // getBody(item, body => {
-        //     // created date might be difficult to get the same between client and server
-        //     // because of date formatting differences
-        //     let dateStr = item.dateTimeCreated.toISOString();
-        //     let shortDateStr = dateStr.substring(0, dateStr.lastIndexOf('.'));
-
-        //     var rawStr = `${item.subject} ${body}`;
-        //     for (const [key, value] of Object.entries(item.attachments)) {
-        //         rawStr += ` ${value.name} ${value.size}`;
-        //     }
-
-        //     let hashStr = SHA256.setUTF8(true).hex(rawStr);
-
-        //     printPrimitive('filevineHash', `${hashStr}.${shortDateStr}`, 0, false, 'hash-display');
-        //     printPrimitive('hashDate', shortDateStr, 0, false, 'seed-display');
-        //     printPrimitive('hashSeed', rawStr, 0, true, 'seed-display', '');
-        // });
     }
 
-    function toggleHeaders(item, event) {
-        var headers = document.getElementById('headers-display');
-        let isVisible = headers.offsetParent !== null;
-        if (isVisible) {
-            headers.style.display = 'none';
-            event.target.textContent = 'Show Headers'
-        }
-        else {
-            headers.style.display = 'block';
-            event.target.textContent = 'Hide Headers'
-        }
+    function getHash(item, onResult) {
+        getHeaders(item, rawHeaders => {
+            const parser = new PostalMime();
+            parser.parse(rawHeaders).then(email => {
+                for (let i = 0; i < email.headers.length; i++) {
+                    const header = email.headers[i];
+                    if (header.key == 'message-id') {
+                        onResult(encodeURI(header.value));
+                        return;
+                    }
+                }
+            });
+        });
     }
 
-    function toggleSeed(item, event) {
-        var seed = document.getElementById('seed-display');
-        let isVisible = seed.offsetParent !== null;
+    function toggleVisibility(id, name, event) {
+        var node = document.getElementById(id);
+        let isVisible = node.offsetParent !== null;
         if (isVisible) {
-            seed.style.display = 'none';
-            event.target.textContent = 'Show Seed'
+            node.style.display = 'none';
+            event.target.textContent = `Show ${name}`
         }
         else {
-            seed.style.display = 'block';
-            event.target.textContent = 'Hide Seed'
+            node.style.display = 'block';
+            event.target.textContent = `Hide ${name}`
         }
     }
 </script>
